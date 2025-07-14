@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Pro Gratis</title>
+
+  <!-- Fav Icon -->
+   <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar for dropdown */
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: #a0aec0;
+      border-radius: 3px;
+    }
+    /* Smooth transitions */
+    .transition-shadow {
+      transition: box-shadow 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto flex items-center p-4 gap-4">
+      <a href="#" class="flex items-center shrink-0">
+        <img src="logo.png" alt="Logo WarungKevin with warm orange color and playful style" class="w-12 h-12 rounded" />
+        <span class="ml-2 font-bold text-lg text-orange-600 select-none">APK PRO GRATIS</span>
+      </a>
+      <div class="flex-grow relative">
+        <input type="search" id="searchInput" aria-label="Pencarian aplikasi" placeholder="Cari aplikasi..." autocomplete="off"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-700" />
+        <ul id="searchResults" class="absolute left-0 right-0 bg-white border border-gray-300 rounded-b-lg max-h-60 overflow-auto mt-0.5 z-50 hidden scrollbar-thin"
+          tabindex="-1" role="listbox" aria-labelledby="searchInput" aria-live="polite"></ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6">
+
+    <section aria-labelledby="trendingTitle" class="mt-10">
+      <h2 id="trendingTitle" class="flex items-center text-xl font-semibold mb-2 select-none" tabindex="0" aria-label="Trending">
+        <svg class="w-6 h-6 mr-1 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2L9.243 8.485L2 9.127l5.364 4.956L5.827 21l6.173-3.382L18.173 21l-1.529-7.917L22 9.127l-7.243-.642L12 2z"/>
+        </svg>
+        APLIKASI
+      </h2>
+      <p class="mb-2 text-gray-700 select-none">Berikut adalah beberapa aplikasi pro gratis.</p>
+      <p class="mb-6 text-gray-700 select-none">Klik pada aplikasi untuk mendownload.</p>
+      <ul id="appList" class="grid grid-cols-1 sm:grid-cols-3 gap-6" role="list">
+        <!-- Apps will be injected here -->
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- Modal -->
+  <div id="downloadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="relative bg-white rounded-lg max-w-md w-full shadow-lg p-6" role="document">
+      <button id="modalCloseBtn" aria-label="Close modal" class="absolute right-4 top-4 text-gray-600 hover:text-gray-900 transition-shadow rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
+        &times;
+      </button>
+      <h3 id="modalTitle" class="text-xl font-semibold mb-3">Link Download Aplikasi</h3>
+      <p id="modalDesc" class="mb-4 text-gray-700 break-words"></p>
+      <a id="modalDownloadLink" href="#" target="_blank" rel="noopener" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500">Download</a>
+    </div>
+  </div>
+
+  <script>
+    // Sample app data with download links
+    const apps = [
+      {
+        id: 'alight-motion-pro',
+        name: 'Alight Motion Pro',
+        author: 'v5.0.272',
+        image: 'https://play-lh.googleusercontent.com/OU0BlP8C9-V7ECl2crma7B48nzDbK7liSLjn0j_fpTlyWG6qyEE-mw_KFZ9aOXF0a3w',
+        downloadLink: 'https://sfl.gl/7IseYQWv'
+      },
+      {
+        id: 'capcut-pro',
+        name: 'Capcut Pro',
+        author: 'v15.8.0',
+        image: 'https://capzcut.com/wp-content/uploads/2024/01/capcut-image-1.webp',
+        downloadLink: 'https://sfl.gl/7G32h'
+      },
+      {
+        id: 'picsart-pro',
+        name: 'Picsart Gold',
+        author: 'v28.9.6',
+        image: 'https://img.utdstc.com/icon/7ca/e68/7cae689089d12acb995d93f72c77958ec48270c351b8ad3d6953cd200a3e6f5b:200',
+        downloadLink: ''
+      }
+    ];
+
+    // DOM elements
+    const appListEl = document.getElementById('appList');
+    const searchInput = document.getElementById('searchInput');
+    const downloadModal = document.getElementById('downloadModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalDownloadLink = document.getElementById('modalDownloadLink');
+
+    // Function to create and display app cards in list
+    function renderApps(appArray) {
+      appListEl.innerHTML = '';
+      if (appArray.length === 0) {
+        appListEl.innerHTML = '<li class="text-center col-span-full py-6 text-gray-500 select-none">Tidak ada aplikasi ditemukan.</li>';
+        return;
+      }
+      appArray.forEach(app => {
+        const li = document.createElement('li');
+        li.className = "bg-gray-100 rounded-lg p-3 flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-orange-500";
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-pressed', 'false');
+        li.setAttribute('aria-label', `Klik untuk membuka link download aplikasi ${app.name}`);
+        li.dataset.appId = app.id;
+
+        li.innerHTML = `
+          <img src="${app.image}" alt="Logo aplikasi ${app.name} dengan gaya ikon aplikasi game berwarna" class="w-16 h-16 rounded-lg object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0ed7e14a-b61a-4d55-a1db-324504a57598.png';" />
+          <div>
+            <p class="font-semibold truncate max-w-xs">${app.name}</p>
+            <p class="text-gray-600 text-sm truncate max-w-xs">${app.author}</p>
+          </div>
+        `;
+
+        // Click or keypress listener to open download modal
+        li.addEventListener('click', () => openDownloadModal(app));
+        li.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openDownloadModal(app);
+          }
+        });
+
+        appListEl.appendChild(li);
+      });
+    }
+
+    // Open download modal and set content
+    function openDownloadModal(app) {
+      modalDesc.textContent = `Anda dapat mendownload aplikasi "${app.name} ${app.author}". Klik tombol download di bawah untuk memulai pengunduhan.`;
+      modalDownloadLink.href = app.downloadLink;
+      modalDownloadLink.setAttribute('aria-label', `Download aplikasi ${app.name}`);
+      downloadModal.classList.remove('hidden');
+      // Focus the download button for accessibility
+      modalDownloadLink.focus();
+    }
+
+    // Close modal function
+    function closeModal() {
+      downloadModal.classList.add('hidden');
+      // Return focus to search input to maintain flow
+      searchInput.focus();
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    downloadModal.addEventListener('click', e => {
+      if (e.target === downloadModal) closeModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !downloadModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // Filter apps based on search input
+    function filterApps(query) {
+      query = query.trim().toLowerCase();
+      if (!query) return apps;
+      return apps.filter(app => 
+        app.name.toLowerCase().includes(query) || 
+        app.author.toLowerCase().includes(query)
+      );
+    }
+
+    searchInput.addEventListener('input', e => {
+      renderApps(filterApps(e.target.value));
+    });
+
+    // Initial render
+    renderApps(apps);
+  </script>
+
+</body>
+</html>
+
